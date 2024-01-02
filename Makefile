@@ -17,7 +17,8 @@ STRIP		= $(CROSS_COMPILE)strip
 
 WAXINCLUDE = include/
 
-CFLAGS:= -I$(WAXINCLUDE)
+LDFLAGS := -lcurl
+CFLAGS := -I$(WAXINCLUDE) -g
 
 PHONY += all
 __all: all FORCE
@@ -25,7 +26,9 @@ __all: all FORCE
 
 ifeq ($(obj),)
   all: wax2
-  obj-y += wax2.o
+  obj-y += libwax/
+  obj-y += core/
+  obj-y += steam/
 else
   all: $(obj)/built-in.o
   include $(obj)/Makefile
@@ -41,20 +44,27 @@ obj-y := $(filter %.o,$(obj-y)) $(patsubst %,%/built-in.o,$(filter-out %.o,$(obj
 # 'built-in.o' is depending on all the object 
 # written in 'Makefile' under this folder
 $(obj)/built-in.o: $(obj-y)
-	$(LD) -r -o $@ $^
+	@$(LD) -r -o $@ $^
 
 %/built-in.o: % FORCE
-	$(MAKE) obj=$<
+	@$(MAKE) obj=$<
 
 # Due to that the 'xxx.h' will become an prerequisites after including '%.d',
 # so only take the first prerequisites by '$<'
 %.o: %.c
-	$(CC) $(CFLAGS) -MMD -c -o $@ $<
+	@printf "  %-7s %s\n" CC $@
+	@$(CC) $(CFLAGS) -MMD -c -o $@ $<
 
-rm-files += wax2 System.map
+rm-files += wax2 wax2_unstripped System.map
 wax2: $(obj-y)
-	$(CC) -o $@ $^ 
-	$(NM) -n $@ > System.map
+	@printf "  %-7s %s\n" LD $@_unstripped
+	@$(CC) $(LDFLAGS) -o $@_unstripped $^
+
+	@printf "  %-7s %s\n" NM System.map
+	@$(NM) -n $@_unstripped > System.map
+
+	@printf "  %-7s %s\n" STRIP $@
+	@$(STRIP) -s -o $@ $@_unstripped
 
 PHONY += clean
 clean:

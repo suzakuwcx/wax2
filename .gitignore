@@ -3,7 +3,9 @@
 *.d
 
 /wax2
+/wax2_unstripped
 /System.map
+/compile_commands.json
 
 #
 # We don't want to ignore the following even if they are dot-files
