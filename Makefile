@@ -33,7 +33,7 @@ else
   all: $(obj)/built-in.o
   include $(obj)/Makefile
   obj-y := $(addprefix $(obj)/,$(obj-y))
-  -include $(patsubst %.o,%.d,$(obj-y))
+  -include $(patsubst %.o,%.d,$(filter %.o,$(obj-y)))
 endif
 
 # strip all the '/' suffix for folder object
