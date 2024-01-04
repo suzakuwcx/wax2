@@ -73,3 +73,13 @@ int systemf(const char *restrict format, ...)
 
     return system(command);
 }
+
+void clear()
+{
+    printf("\33[H\33[2J\r");
+}
+
+void clear_line()
+{
+    printf("\33[2K\r");
+}

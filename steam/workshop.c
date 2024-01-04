@@ -175,7 +175,6 @@ static int steamcmd_app_update(const char *app_id)
 }
 
 
-
 static int steamcmd_workshop_item_downloads(const char * const *ids, size_t len)
 {
     char command[4096];
@@ -319,3 +318,8 @@ clean:
     return 0;
 }
 
+
+inline int download_dst_server()
+{
+    return steamcmd_app_update("343050");    
+}

@@ -212,4 +212,18 @@ int rm_r(const char *path);
  */
 bool is_string_number(const char *str);
 
+
+struct dfa;
+
+
+struct dfa *new_dfa(char *regex);
+int dfa_check(struct dfa *d, char *buf, size_t len);
+void dfa_reset(struct dfa *d);
+void dfa_delete(struct dfa *d);
+
+
+void clear();
+void clear_line();
+
+
 #endif /* _LIBWAX_H_ */
