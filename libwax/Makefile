@@ -1,4 +1,5 @@
 obj-y += dtach/
+obj-y += lxdialog/
 obj-y += coreutils.o
 obj-y += cp.o
 obj-y += rm.o

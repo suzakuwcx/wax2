@@ -17,7 +17,7 @@ STRIP		= $(CROSS_COMPILE)strip
 
 WAXINCLUDE = include/
 
-LDFLAGS := -lcurl
+LDFLAGS := -lcurl -lncurses
 CFLAGS := -I$(WAXINCLUDE) -g
 
 PHONY += all
