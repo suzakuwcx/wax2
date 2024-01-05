@@ -36,7 +36,7 @@ static int on_upgrade_server()
 static int on_start_server()
 {
 	int ret = 0;
-	char *cluster = strdup(config_get_cluster());
+	char *cluster = strdup(config_get_cluster_name());
 	char *argv_master[] = {"./dontstarve_dedicated_server_nullrenderer_x64", "-shared", "Master", "-cluster", cluster, NULL};
 	char *argv_cave[] = {"./dontstarve_dedicated_server_nullrenderer_x64", "-shared", "Caves", "-cluster", cluster, NULL};
 	int is_master_success = 0;
@@ -55,9 +55,9 @@ static int on_start_server()
 		return 1;
 	}
 
-	ret = chdir(config_get_server_binary_path());
+	ret = chdir(config_get_server_binary_dir());
 	if (ret < 0) {
-		fprintf(stderr, "cannot change to server directory %s: %s\n", config_get_server_binary_path(), strerror(errno));
+		fprintf(stderr, "cannot change to server directory %s: %s\n", config_get_server_binary_dir(), strerror(errno));
 		fprintf(stderr, "note: you can use '%s -Su' to download server binary\n", config_get_program_name());
 		ret = -1;
 		goto clean;

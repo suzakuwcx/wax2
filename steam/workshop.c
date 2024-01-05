@@ -144,7 +144,7 @@ static int steamcmd_install(const char *path)
 
 static int steamcmd_run_command(const char *argv)
 {
-    const char *path = config_get_steamcmd_path();
+    const char *path = config_get_wax_dir();
     const char *exe = "steamcmd.sh";
     char buff[128];
 
@@ -278,7 +278,7 @@ int download_workshops(const char * const *ids, int len)
         }
 
         snprintf(dst_mod_install_location, sizeof(dst_mod_install_location),
-                "%s/mods/workshop-%s", config_get_dst_server_path(), ids[i]);
+                "%s/mods/workshop-%s", config_get_dst_app_dir(), ids[i]);
 
         if (ret == 0) { /* ugc mod */
             curl_download_file_request_cdn(download_url, "/tmp/mod_publish_data_file.zip");
@@ -300,9 +300,9 @@ int download_workshops(const char * const *ids, int len)
 
     for (int i = 0; i < vector_len(vec); ++i) {
         snprintf(dst_mod_install_location, sizeof(dst_mod_install_location),
-        "%s/mods/workshop-%s", config_get_dst_server_path(), workshop_ids[i]);
+        "%s/mods/workshop-%s", config_get_dst_app_dir(), workshop_ids[i]);
         snprintf(workshop_mod_download_location, sizeof(workshop_mod_download_location), 
-                "%s/%s", config_get_dst_workshop_download_path(), workshop_ids[i]);
+                "%s/%s", config_get_dst_workshop_download_dir(), workshop_ids[i]);
         mkdir_p(dst_mod_install_location);
         rm_r(dst_mod_install_location);
         ret = mv(workshop_mod_download_location, dst_mod_install_location);

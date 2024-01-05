@@ -4,6 +4,7 @@
 
 #include <curl/curl.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,26 +13,30 @@
 #include <unistd.h>
 
 #include <wax/conf.h>
+#include <wax/libwax.h>
 
 extern int errno;
 
 struct config {
+    char *wax_dir;
+    char *steam_dir;
+    char *dst_app_dir;
+    char *dst_server_binary_dir;
+    char *dst_workshop_download_dir;
+
+    char *token_path;
+    
+    char *token;
+    char *cluster_name;
     char *program_name;
-    char *steam_path;
-    char *wax_path;
-    char *dst_server_path;
-    char *dst_server_binary_path;
-    char *dst_server_name;
-    char *dst_workshop_download_path;
+    char *dst_server_exe_name;
 
     char * const *argument_list;
 
     enum wax_op op;
     enum wax_subop sub_op;
-    char *cluster;
+    
     bool help;
-
-    bool op_m_menu;
 };
 
 static struct config *conf;
@@ -41,15 +46,13 @@ static void __attribute__((constructor)) init_module_conf()
     char buff[256];
     char *p;
 
-    memset(buff, 0, sizeof(buff));
-
     conf = calloc(1, sizeof(struct config));
     if (conf == NULL) {
         perror("Cannot assign memory for config");
         exit(1);
     }
 
-    conf->cluster = strdup("Cluster_1");
+    conf->cluster_name = strdup("Cluster_1");
 
     p = getenv("HOME");
     if (p == NULL) {
@@ -57,26 +60,31 @@ static void __attribute__((constructor)) init_module_conf()
         exit(1);
     }
 
-    snprintf(buff, sizeof(buff), "%s/.local/share/wax/", p);
-    conf->wax_path = strdup(buff);
+    memset(buff, 0, sizeof(buff));
+    snprintf(buff, sizeof(buff), "%s/.local1/share/wax/", p);
+    conf->wax_dir = strdup(buff);
 
     memset(buff, 0, sizeof(buff));
     snprintf(buff, sizeof(buff), "%s/Steam/", p);
-    conf->steam_path = strdup(buff);
+    conf->steam_dir = strdup(buff);
 
     memset(buff, 0, sizeof(buff));
-    snprintf(buff, sizeof(buff), "%s/steamapps/common/Don't Starve Together Dedicated Server/", conf->steam_path);
-    conf->dst_server_path = strdup(buff);
+    snprintf(buff, sizeof(buff), "%s/steamapps/common/Don't Starve Together Dedicated Server/", conf->steam_dir);
+    conf->dst_app_dir= strdup(buff);
 
     memset(buff, 0, sizeof(buff));
-    snprintf(buff, sizeof(buff), "%s/bin64/", conf->dst_server_path);
-    conf->dst_server_binary_path = strdup(buff);
-
-    conf->dst_server_name = strdup("dontstarve_dedicated_server_nullrenderer_x64");
+    snprintf(buff, sizeof(buff), "%s/bin64/", conf->dst_app_dir);
+    conf->dst_server_binary_dir = strdup(buff);
 
     memset(buff, 0, sizeof(buff));
-    snprintf(buff, sizeof(buff), "%s/steamapps/workshop/content/322330/", conf->steam_path);
-    conf->dst_workshop_download_path = strdup(buff);
+    snprintf(buff, sizeof(buff), "%s/steamapps/workshop/content/322330/", conf->steam_dir);
+    conf->dst_workshop_download_dir = strdup(buff);
+
+    memset(buff, 0, sizeof(buff));
+    snprintf(buff, sizeof(buff), "%s/cluster_token.txt", conf->wax_dir);
+    conf->token_path = strdup(buff); 
+
+    conf->dst_server_exe_name = strdup("dontstarve_dedicated_server_nullrenderer_x64");
 
     return;
 }
@@ -84,15 +92,19 @@ static void __attribute__((constructor)) init_module_conf()
 
 static void __attribute__((destructor)) module_conf_exit()
 {
-    free(conf->dst_workshop_download_path);
-    free(conf->dst_server_name);
-    free(conf->dst_server_binary_path);
-    free(conf->dst_server_path);
-    free(conf->steam_path);
-    free(conf->wax_path);
+    free(conf->wax_dir);
+    free(conf->steam_dir);
+    free(conf->dst_app_dir);
+    free(conf->dst_server_binary_dir);
+    free(conf->dst_workshop_download_dir);
 
-    free(conf->cluster);
-    if (conf->program_name != NULL) free(conf->program_name);
+    free(conf->token_path);
+
+    if(conf->token) free(conf->token);
+    free(conf->cluster_name);
+    free(conf->program_name);
+    free(conf->dst_server_exe_name);
+
     free(conf);
 } 
 
@@ -108,7 +120,7 @@ static void usage(const char *name)
 	printf("Examples:\n");
 	printf("  -Mh                    show help message for mod\n");
     printf("\n");
-	printf("Config file location is '%s' and '%s/Steam'\n", config_get_steamcmd_path(), getenv("HOME"));
+	printf("Config file location is '%s' and '%s/Steam'\n", config_get_wax_dir(), getenv("HOME"));
 }
 
 
@@ -193,8 +205,8 @@ static int parseargs_server(int opt)
             break;
         case OP_CLUSTER:
             conf->sub_op = CONFIG_SUBOP_NONE;
-            free(conf->cluster);
-            conf->cluster = strdup(optarg);
+            free(conf->cluster_name);
+            conf->cluster_name = strdup(optarg);
             break;
         default:
             return -EPERM;
@@ -316,34 +328,48 @@ inline bool config_is_upgrade_server()
     return conf->op == CONFIG_OP_SERVER && conf->sub_op == CONFIG_SUBOP_UPGRADE;
 }
 
-inline const char *config_get_steamcmd_path()
+inline const char *config_get_wax_dir()
 {
-    return conf->wax_path;
+    return conf->wax_dir;
 }
 
-inline const char *config_get_dst_server_path()
+inline const char *config_get_dst_app_dir()
 {
-    return conf->dst_server_path;
+    return conf->dst_app_dir;
 }
 
-inline const char *config_get_server_binary_path()
+inline const char *config_get_server_binary_dir()
 {
-    return conf->dst_server_binary_path;
+    return conf->dst_server_binary_dir;
 }
 
-inline const char *config_get_dst_workshop_download_path()
+inline const char *config_get_dst_workshop_download_dir()
 {
-    return conf->dst_workshop_download_path;
+    return conf->dst_workshop_download_dir;
 }
 
-inline const char *config_get_cluster()
+inline const char *config_get_cluster_name()
 {
-    return conf->cluster;
+    return conf->cluster_name;
 }
 
-inline const char *config_get_server_name()
+inline const char *config_get_cluster_dir()
 {
-    return conf->dst_server_name;
+    char buff[256];
+
+    memset(buff, 0, sizeof(buff));
+    snprintf(buff, sizeof(buff), "%s/.klei/DoNotStarveTogether/%s", getenv("HOME"), conf->cluster_name);
+    return strdup(buff);
+}
+
+inline const char *config_get_token_path()
+{
+    return conf->token_path;
+}
+
+inline const char *config_get_server_exe_name()
+{
+    return conf->dst_server_exe_name;
 }
 
 inline const char *config_get_program_name()
@@ -364,3 +390,42 @@ inline int config_get_arguments_list_len()
     return i;
 }
 
+const char *config_get_token()
+{
+    size_t len;
+
+    if (conf->token != NULL)
+        return conf->token;
+
+    FILE *fp = fopen(config_get_token_path(), "r");
+    if (fp == NULL) {
+        perror("fopen");
+        return NULL;
+    }
+
+    conf->token = calloc(1, TOKEN_MAXSIZE);
+    fread(conf->token, 1, TOKEN_MAXSIZE, fp);
+
+    return conf->token;
+}
+
+void config_set_token(const char *token)
+{
+    mkdir_p(config_get_cluster_dir());
+    FILE *fp = fopen(config_get_token_path(), "w+");
+    if (fp == NULL) {
+        perror("fopen");
+        return;
+    }
+
+    if (conf->token != NULL)
+        free(conf->token);
+
+    conf->token = calloc(1, TOKEN_MAXSIZE);
+
+    strncpy(conf->token, token, TOKEN_MAXSIZE);
+
+    fwrite(token, 1, TOKEN_MAXSIZE, fp);
+    fclose(fp);
+    return;
+}

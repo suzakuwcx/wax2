@@ -1,5 +1,7 @@
 #include <stdbool.h>
 
+#define TOKEN_MAXSIZE 256
+
 struct config;
 
 enum wax_op {
@@ -30,12 +32,21 @@ bool config_is_configure_mod();
 bool config_is_start_server();
 bool config_is_stop_server();
 bool config_is_upgrade_server();
-const char *config_get_steamcmd_path();
-const char *config_get_dst_server_path();
-const char *config_get_dst_workshop_download_path();
-const char *config_get_cluster();
+
+const char *config_get_wax_dir();
+const char *config_get_dst_app_dir();
+const char *config_get_cluster_dir();
+const char *config_get_server_binary_dir();
+const char *config_get_dst_workshop_download_dir();
+
+const char *config_get_token_path();
+
+const char *config_get_token();
+const char *config_get_cluster_name();
 const char *config_get_program_name();
-const char *config_get_server_binary_path();
-const char *config_get_server_name();
+const char *config_get_server_exe_name();
+
 const char * const *config_get_arguments_list();
 int config_get_arguments_list_len();
+
+void config_set_token(const char *token);
