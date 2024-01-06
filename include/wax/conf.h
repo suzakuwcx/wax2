@@ -32,14 +32,16 @@ bool config_is_configure_mod();
 bool config_is_start_server();
 bool config_is_stop_server();
 bool config_is_upgrade_server();
+bool config_is_server_menu();
 
 const char *config_get_wax_dir();
 const char *config_get_dst_app_dir();
-const char *config_get_cluster_dir();
+const char *config_get_dst_cluster_dir();
 const char *config_get_server_binary_dir();
 const char *config_get_dst_workshop_download_dir();
 
 const char *config_get_token_path();
+const char *config_get_config_file_path();
 
 const char *config_get_token();
 const char *config_get_cluster_name();
@@ -50,3 +52,10 @@ const char * const *config_get_arguments_list();
 int config_get_arguments_list_len();
 
 void config_set_token(const char *token);
+void config_set_cluster_name(const char *value);
+void config_set_value(const char *key, const char *value);
+
+void config_save();
+void config_load();
+
+int conf_menu();

@@ -46,7 +46,7 @@ int mkdir_p(const char *path)
         if (access(p, F_OK) != 0 && strlen(p) != 0) {
             ret = mkdir(p, 0777);
             if (ret < 0){
-                fprintf(stderr, "Cannot create directory \'%s\': %s", p, strerror(errno));
+                fprintf(stderr, "Cannot create directory \'%s\': %s\n", p, strerror(errno));
                 goto clean;
             }
         }
@@ -74,7 +74,7 @@ int systemf(const char *restrict format, ...)
     return system(command);
 }
 
-void clear()
+void clear_screen()
 {
     printf("\33[H\33[2J\r");
 }

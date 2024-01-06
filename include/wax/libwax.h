@@ -30,7 +30,7 @@ struct vector *new_vector(void (*obj_delete)(void *));
 
 
 /**
- * @brief get an element from vector
+ * @brief get an element from vector, the ptr that returned must not be freed
  * 
  * @param vec Vector object, created by 'new_vector()'
  * @param i the index
@@ -115,6 +115,49 @@ void vector_delete(struct vector *vec);
  * @endcode
  */
 int vector_len(struct vector *vec);
+
+
+/**
+ * @brief convert vector to a constant object array, return value need to be
+ *         freed by 'vector_obj_array_delete()'
+ * 
+ * @param vec Vector object, created by 'new_vector()'
+ * @param size The memory size of the object, if size is 0, treat object is 
+ *              a c string and judge the size by 'strlen()'
+ * @return ptr It contains all the values store in vector, caller shouldn't 
+ *          try to free or modify any of the value in it.
+ *
+ * @code
+ * const char * const *arrays = vector_to_obj_array(vec, 0);
+ * for (int i = 0; i < vector_len(vec); ++i)
+ *     printf("string: %s", arrays[0]);
+ * vector_obj_array_delete(arrays, 0);
+ * @endcode
+ */
+const void * const * vector_to_obj_array(struct vector *vec, size_t size);
+
+
+/**
+ * @brief free memory allocd by 'vector_to_obj_array()'
+ * 
+ * @param arrays the arrays returned by 'vector_to_obj_array()'
+ * @param size The memory size of the object, if size is 0, treat object is 
+ *              a c string and judge the size by 'strlen()
+ */
+void vector_obj_array_delete(void **arrays, size_t size);
+
+
+/**
+ * @brief find the index of the object in vector
+ * 
+ * @param vec Vector object, created by 'new_vector()'
+ * @param obj The object that to be found
+ * @param size The memory size of the object, if size is 0, treat object is 
+ *              a c string and judge the size by 'strlen()'
+ * @return int Find the object at the index
+ * @return -1 Object not found
+ */
+int vector_find(struct vector *vec, const void *obj, size_t size);
 
 
 /**
@@ -222,7 +265,7 @@ void dfa_reset(struct dfa *d);
 void dfa_delete(struct dfa *d);
 
 
-void clear();
+void clear_screen();
 void clear_line();
 
 

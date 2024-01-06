@@ -1,3 +1,4 @@
+#include <linux/limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,6 +10,7 @@
 #include <wax/conf.h>
 #include <wax/libwax.h>
 #include <wax/dtach.h>
+#include <wax/conf-file.h>
 
 
 static int on_install_mod()
@@ -36,11 +38,16 @@ static int on_upgrade_server()
 static int on_start_server()
 {
 	int ret = 0;
-	char *cluster = strdup(config_get_cluster_name());
-	char *argv_master[] = {"./dontstarve_dedicated_server_nullrenderer_x64", "-shared", "Master", "-cluster", cluster, NULL};
-	char *argv_cave[] = {"./dontstarve_dedicated_server_nullrenderer_x64", "-shared", "Caves", "-cluster", cluster, NULL};
 	int is_master_success = 0;
 	int is_caves_success = 0;
+
+	char *cluster = strdup(config_get_cluster_name());
+	char cluster_path[PATH_MAX];
+	char *argv_master[] = {"./dontstarve_dedicated_server_nullrenderer_x64", "-shard", "Master", "-cluster", cluster, NULL};
+	char *argv_cave[] = {"./dontstarve_dedicated_server_nullrenderer_x64", "-shard", "Caves", "-cluster", cluster, NULL};
+
+	memset(cluster_path, 0, sizeof(cluster_path));
+	snprintf(cluster_path, sizeof(cluster_path), "%s/%s", config_get_dst_cluster_dir(), cluster);
 
 	if (tcgetattr(0, &orig_term) < 0)
 	{
@@ -70,6 +77,8 @@ static int on_start_server()
         {
             if (errno == ECONNREFUSED)
                 unlink(sockname);
+			
+			cp_r(config_get_token_path(), cluster_path);
             if (master_main(argv_master, 1, 0) != 0) {
 				ret = 1;
 				goto clean;
@@ -141,6 +150,8 @@ int main(int argc, char *argv[])
 		on_start_server();
 	} else if (config_is_stop_server()) {
 		on_stop_server();
+	} else if (config_is_server_menu()) {
+		conf_menu();
 	}
 
     return 0;

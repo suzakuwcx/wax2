@@ -116,7 +116,54 @@ void vector_delete(struct vector *vec)
     free(vec);
 }
 
+
 inline int vector_len(struct vector *vec)
 {
     return vec->len;
 }
+
+
+int vector_find(struct vector *vec, const void *obj, size_t size)
+{
+    for (int i = 0; i < vec->len; ++i) {
+        if (size == 0) {
+            if (strcmp(vec->ptr[i], obj) == 0)
+                return i;
+        }
+        else if (memcmp(vec->ptr[i], obj, size) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+
+const void * const * vector_to_obj_array(struct vector *vec, size_t size)
+{
+    void **arrays;
+
+    arrays = calloc(vector_len(vec), sizeof(void *));
+
+    for (int i = 0; i < vector_len(vec); ++i) {
+        if (size == 0) {
+            arrays[i] = calloc(1, strlen(vector_get(vec, i)) + 1);
+            strcpy(arrays[i], vector_get(vec, i));
+        }
+        else {
+            arrays[i] = calloc(1, size);
+            memcpy(arrays[i], vector_get(vec, i), size);
+        }
+    }
+
+    return (const void * const * )arrays;
+}
+
+
+void vector_obj_array_delete(void **arrays, size_t size)
+{
+    for (int i = 0; i < size; ++i)
+        free(arrays[i]);
+    
+    free(arrays);
+}
+
