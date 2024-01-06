@@ -430,19 +430,21 @@ const char *config_get_token()
 {
     FILE *fp = fopen(config_get_token_path(), "r");
 
+    memset(conf->token, 0, TOKEN_MAXSIZE);
+
     /* If no such file, try to create one */
     if (fp == NULL)
         fp = fopen(config_get_token_path(), "w+");
 
     if (fp == NULL) {
-        fprintf(stderr, "cannot open token file %s: %s", config_get_token_path(), strerror(errno));
-        goto clean;
+        fprintf(stderr, "cannot open token file %s: %s\n", config_get_token_path(), strerror(errno));
+        goto ret;
     }
 
-    memset(conf->token, 0, TOKEN_MAXSIZE);
     fread(conf->token, 1, TOKEN_MAXSIZE, fp);
 clean:
     fclose(fp);
+ret:
     return conf->token;
 }
 
@@ -452,11 +454,10 @@ void config_set_token(const char *token)
     FILE *fp = fopen(config_get_token_path(), "w+");
     if (fp == NULL) {
         fprintf(stderr, "cannot open token file %s: %s", config_get_token_path(), strerror(errno));
-        goto clean;
+        return;
     }
 
     fwrite(token, 1, strlen(token), fp);
-clean:
     fclose(fp);
     return;
 }
@@ -490,6 +491,10 @@ void config_save()
 
     memset(buff, 0, sizeof(buff));
     fp = fopen(conf->config_file_path, "w+");
+    if (fp == NULL) {
+        fprintf(stderr, "Cannot save configuration file %s: %s\n", conf->config_file_path, strerror(errno));
+        return;
+    }
     
     snprintf(buff, sizeof(buff), "%s = %s\n", "ClusterName", conf->cluster_name);
     fputs(buff, fp);
