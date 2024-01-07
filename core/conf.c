@@ -57,7 +57,7 @@ static void __attribute__((constructor)) init_module_conf()
 
     conf = calloc(1, sizeof(struct config));
     if (conf == NULL) {
-        perror("Cannot assign memory for config");
+        perror("cannot assign memory for config");
         exit(1);
     }
 
@@ -453,7 +453,7 @@ void config_set_token(const char *token)
 {
     FILE *fp = fopen(config_get_token_path(), "w+");
     if (fp == NULL) {
-        fprintf(stderr, "cannot open token file %s: %s", config_get_token_path(), strerror(errno));
+        fprintf(stderr, "cannot open token file %s: %s\n", config_get_token_path(), strerror(errno));
         return;
     }
 
@@ -492,7 +492,7 @@ void config_save()
     memset(buff, 0, sizeof(buff));
     fp = fopen(conf->config_file_path, "w+");
     if (fp == NULL) {
-        fprintf(stderr, "Cannot save configuration file %s: %s\n", conf->config_file_path, strerror(errno));
+        fprintf(stderr, "cannot save configuration file %s: %s\n", conf->config_file_path, strerror(errno));
         return;
     }
     

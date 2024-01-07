@@ -229,7 +229,7 @@ static int get_workshop_item_download_url(const char *id, char *download_url, si
 
     ret = curl_post_request(url, post_field, recv_field, sizeof(recv_field));
     if (ret < 0) {
-        fprintf(stderr, "Cannot access %s", url);
+        fprintf(stderr, "cannot access %s", url);
         return -1;
     }
 

@@ -46,7 +46,7 @@ int mkdir_p(const char *path)
         if (access(p, F_OK) != 0 && strlen(p) != 0) {
             ret = mkdir(p, 0777);
             if (ret < 0){
-                fprintf(stderr, "Cannot create directory \'%s\': %s\n", p, strerror(errno));
+                fprintf(stderr, "cannot create directory \'%s\': %s\n", p, strerror(errno));
                 goto clean;
             }
         }
