@@ -267,13 +267,18 @@ search_help[] =
 	"\n";
 
 
-static int check_list(const char *title, struct vector *items, size_t len, int selected)
+/*
+ * generate a check list tui by items in vectors, return the item being chosen,
+ * 'selected' is the first item to be selected in tui
+ * if nothing is being chosen, return the 'selected'
+ */
+static int check_list(const char *title, struct vector *items, int selected)
 {
-	int res;
+	int res = 0;
 
 	item_reset();
 
-	for (int i = 0; i < len; ++i) {
+	for (int i = 0; i < vector_len(items); ++i) {
 		item_make("%s", vector_get(items, i));
 		if (i == selected) item_set_tag('X');
 	}
@@ -371,8 +376,9 @@ int conf_menu()
 					input_box("Token", token);
 				}
 				else if (selected == 1)  {
-					res = check_list("Cluster", vec, vector_len(vec), vector_find(vec, cluster, 0));
-					strncpy(cluster, vector_get(vec, res), FILENAME_MAX);
+					check_list("Cluster", vec, vector_find(vec, cluster, 0));
+					if (vector_len(vec) != 0)
+						strncpy(cluster, vector_get(vec, res), FILENAME_MAX);
 				}
 				else if (selected == 3) {
 					input_box("Cluster Name", buff);
