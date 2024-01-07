@@ -30,13 +30,14 @@
 
 
 struct dfa *invalid_token_dfa;
+struct dfa *failed;
 struct dfa *success;
-
 
 static void __attribute__((constructor)) init_module_dtach()
 {
-	invalid_token_dfa = new_dfa("E_INVALID_TOKEN");
-	success = new_dfa("Starting Dedicated Server Game");
+	invalid_token_dfa = new_dfa("Your Server Will Not Start");
+	failed = new_dfa("[Error] Server failed to start!");
+	success = new_dfa("Validating portal");
 }
 
 
@@ -176,6 +177,7 @@ process_kbd(int s, struct packet *pkt)
  * @return: 2 Detach
  * @return: 3 Server boot success
  * @return: 4 Missing token
+ * @return: 5 Unknown error
  */
 int
 attach_main(int noerror, int is_boot)
@@ -311,6 +313,12 @@ attach_main(int noerror, int is_boot)
 				{
 					printf("\r\n[Invalid token]\r\n");
 					return 4;
+				}
+
+				if (dfa_check(failed, buf, len) == 0)
+				{
+					printf("\r\n[Error]\r\n");
+					return 5;
 				}
 			}
 		}
