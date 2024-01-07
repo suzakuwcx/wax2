@@ -7,9 +7,10 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <wax/libwax.h>
-#include <steam/workshop.h>
 #include <wax/conf.h>
+#include <wax/libwax.h>
+#include <wax/vector.h>
+#include <steam/workshop.h>
 
 
 extern int errno;

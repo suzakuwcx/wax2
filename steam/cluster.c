@@ -6,6 +6,7 @@
 
 #include <wax/conf.h>
 #include <wax/libwax.h>
+#include <wax/vector.h>
 
 extern int errno;
 

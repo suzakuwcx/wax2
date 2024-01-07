@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-#include <wax/libwax.h>
+#include <wax/vector.h>
 
 struct vector {
     void **ptr;                 /* object array */

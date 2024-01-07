@@ -4,9 +4,10 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <wax/dialog.h>
 #include <wax/conf.h>
+#include <wax/dialog.h>
 #include <wax/libwax.h>
+#include <wax/vector.h>
 #include <steam/cluster.h>
 
 static const char mconf_readme[] =
