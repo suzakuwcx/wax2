@@ -324,7 +324,7 @@ int parseargs(int argc, char *argv[])
 
 inline bool config_is_install_mod()
 {
-    return conf->op == CONFIG_OP_MOD && conf->sub_op == CONFIG_SUBOP_NONE;
+    return conf->op == CONFIG_OP_MOD && conf->sub_op == CONFIG_SUBOP_NONE && conf->argument_list != NULL;
 }
 
 inline bool config_is_list_mod()
@@ -420,6 +420,8 @@ inline const char * const *config_get_arguments_list()
 inline int config_get_arguments_list_len()
 {
     int i;
+    
+    if (conf->argument_list == NULL) return 0;
 
     for (i = 0; conf->argument_list[i] != NULL; ++i);
     return i;
