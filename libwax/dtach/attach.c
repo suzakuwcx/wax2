@@ -44,6 +44,7 @@ static void __attribute__((constructor)) init_module_dtach()
 static void __attribute__((destructor)) module_dtach_exit()
 {
 	dfa_delete(invalid_token_dfa);
+	dfa_delete(failed);
 	dfa_delete(success);
 } 
 
