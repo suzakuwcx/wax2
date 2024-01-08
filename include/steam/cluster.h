@@ -1,4 +1,4 @@
-#include <wax/libwax.h>
+#include <wax/vector.h>
 
 
 /**
