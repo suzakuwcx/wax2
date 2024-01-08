@@ -7,3 +7,4 @@ obj-y += mv.o
 obj-y += vector.o
 obj-y += dfa.o
 obj-y += list.o
+obj-y += hashmap.o
