@@ -1,3 +1,4 @@
+#include <linux/limits.h>
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -8,6 +9,7 @@
 #include <wax/dialog.h>
 #include <wax/libwax.h>
 #include <wax/vector.h>
+
 #include <steam/cluster.h>
 
 static const char mconf_readme[] =
@@ -268,6 +270,13 @@ search_help[] =
 	"\n";
 
 
+struct symbol {
+    char token[TOKEN_MAXSIZE];
+	char cluster[FILENAME_MAX];
+	struct cluster_conf *conf;
+};
+
+
 /*
  * generate a check list tui by items in vectors, return the item being chosen,
  * 'selected' is the first item to be selected in tui
@@ -326,31 +335,45 @@ static int input_box(const char *title, char *buf)
 int conf_menu()
 {
     int res = 0;
-
     int s_scroll = 0;
     int selected = 0;
-    char token[TOKEN_MAXSIZE];
-	char cluster[FILENAME_MAX];
-	char buff[256];
-	struct vector *vec = new_vector(NULL);
 
-	memset(buff, 0, sizeof(buff));
+	char tmp[PATH_MAX];
+	struct vector *vec;
+	struct vector *gamemode_list;
 
-	strncpy(cluster, config_get_cluster_name(), sizeof(cluster));
-    strncpy(token, config_get_token(), sizeof(token));
-	cluster_list(vec);
+	struct symbol sym;
 
     if (init_dialog(NULL)) {
 		fprintf(stderr, "Your display is too small to run Menuconfig!\n");
 		fprintf(stderr, "It must be at least 19 lines by 80 columns.\n");
 		return -EPERM;
 	}
-    
+
+	memset(tmp, 0, sizeof(tmp));
+	memset(&sym, 0, sizeof(sym));
+
+	strncpy(sym.cluster, config_get_cluster_name(), sizeof(sym.cluster));
+    strncpy(sym.token, config_get_token(), sizeof(sym.token));
+
+	sym.conf = new_cluster_conf(sym.cluster);
+	gamemode_list = cluster_get_gamemode_chosen_list();
+
+	vec = new_vector(NULL);
+	cluster_list(vec);
+
     while (1) {
         item_reset();
 
-        item_make("(%s) Token", token);
-		item_make("Cluster (%s)  -->", cluster);
+        item_make("(%s) Token", sym.token);
+		item_make("Cluster (%s)  -->", sym.cluster);
+		item_make("  Gamemode: (%s)  --->", cluster_get_gamemode(sym.conf));
+		item_make("  Max players (%d)", cluster_get_max_players(sym.conf));
+		item_make("  [%c] Enable pvp", cluster_get_enable_pvp(sym.conf) ? '*' : ' ');
+		item_make("  [%c] Enable rollback vote", cluster_get_enable_rollback_vote(sym.conf) ? '*' : ' ');
+		item_make("  (%s) Server name", cluster_get_server_name(sym.conf));
+		item_make("  (%s) Server description", cluster_get_server_description(sym.conf));
+		item_make("  (%s) Server password", cluster_get_server_password(sym.conf));
 		item_make("---");
 		item_make("Create New Cluster");
 		item_set_selected(selected);
@@ -372,30 +395,74 @@ int conf_menu()
         selected = item_n();
 
 		switch (res) {
-			case 0: /* Enter, Select "Select" */
-				if (selected == 0) {
-					input_box("Token", token);
-				}
-				else if (selected == 1)  {
-					check_list("Cluster", vec, vector_find(vec, cluster, 0));
-					if (vector_len(vec) != 0)
-						strncpy(cluster, vector_get(vec, res), FILENAME_MAX);
-				}
-				else if (selected == 3) {
-					input_box("Cluster Name", buff);
-					cluster_create(buff);
-					vector_delete(vec);
-					vec = new_vector(NULL);
-					cluster_list(vec);
-					text_box("Configuration", "Cluster create");
+		case 0: /* Enter, Select "Select" */
+			switch (selected) {
+			case 0:
+				input_box("Token", sym.token);
+				break;
+			case 1:
+				res = check_list("Cluster", vec, vector_find(vec, sym.cluster, 0));
+				if (vector_len(vec) != 0) {
+					strncpy(sym.cluster, vector_get(vec, res), FILENAME_MAX);
+					cluster_conf_delete(sym.conf);
+					sym.conf = new_cluster_conf(sym.cluster);
 				}
 				break;
-			case 3: /* Enter, Select "Save" */
-				config_set_token(token);
-				config_set_cluster_name(cluster);
-				config_save();
-				text_box("Configuration", "Configuration save");
+			case 2: /* Begin cluster setting */
+				res = check_list("Game mode", gamemode_list, vector_find(gamemode_list, cluster_get_gamemode(sym.conf), 0));
+				cluster_set_mode(sym.conf, vector_get(gamemode_list, res));
 				break;
+			case 3:
+				input_box("Max player", tmp);
+				if (is_string_number(tmp))
+					cluster_set_max_player(sym.conf, tmp);
+				break;
+			case 6:
+				input_box("Server name", tmp);
+				cluster_set_server_name(sym.conf, tmp);
+				break;
+			case 7:
+				input_box("Server description", tmp);
+				cluster_set_server_description(sym.conf, tmp);
+				break;
+			case 8:
+				input_box("Server password", tmp);
+				cluster_set_server_password(sym.conf, tmp);
+				break;				
+			case 10:
+				input_box("Cluster Name", tmp);
+				cluster_create(tmp);
+				vector_delete(vec);
+				vec = new_vector(NULL);
+				cluster_list(vec);
+				text_box("Configuration", "Cluster create");			
+				break;
+			}
+			break;
+		case 3: /* Enter, Select "Save" */
+			config_set_token(sym.token);
+			config_set_cluster_name(sym.cluster);
+			cluster_conf_save(sym.conf);
+			config_save();
+			text_box("Configuration", "Configuration save");
+			break;
+		case 8: /* Space */
+			switch (selected) {
+			case 4: /* Enable pvp */
+				if (cluster_get_enable_pvp(sym.conf))
+					cluster_set_pvp(sym.conf, "false");
+				else
+					cluster_set_pvp(sym.conf, "true");
+				break;
+			case 5: /* Enable rollback vote */
+				if (cluster_get_enable_rollback_vote(sym.conf))
+					cluster_set_vote(sym.conf, "false");
+				else
+					cluster_set_vote(sym.conf, "true");
+				break;
+			}
+
+			break;
 		}
     }
 

@@ -68,7 +68,8 @@ int vector_set(struct vector *vec, int i, const void *buf, size_t size);
  * 
  * @param vec Vector object, created by 'new_vector()'
  * @param buf The object that to be set
- * @param size The memory size of the object
+ * @param size The memory size of the object, if size is 0, treat object is 
+ *              a c string and judge the size by 'strlen()'
  * @return 0 If success
  *
  * @code

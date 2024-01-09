@@ -27,6 +27,21 @@ bool is_string_number(const char *str)
 }
 
 
+bool is_string_bool(const char *str)
+{
+    return strcmp("true", str) == 0 || strcmp("false", str) == 0;
+}
+
+
+bool string_to_bool(const char *str)
+{
+    if (strcmp("true", str) == 0)
+        return true;
+    else
+        return false;
+}
+
+
 int mkdir_p(const char *path)
 {
     int ret = 0;

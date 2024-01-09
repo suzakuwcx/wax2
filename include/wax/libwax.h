@@ -101,6 +101,26 @@ int rm_r(const char *path);
 bool is_string_number(const char *str);
 
 
+/**
+ * @brief check if this string 'true' or 'false'
+ * 
+ * @param str The string to be test
+ * @return true The string is bool
+ * @return false The string is not a bool
+ */
+bool is_string_bool(const char *str);
+
+
+/**
+ * @brief Convert string 'true' or 'false' to bool
+ * 
+ * @param str 'true' or 'false'
+ * @return true Is string 'true'
+ * @return false Is string 'false'
+ */
+bool string_to_bool(const char *str);
+
+
 struct dfa;
 
 

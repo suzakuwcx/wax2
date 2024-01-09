@@ -99,8 +99,14 @@ int vector_push(struct vector *vec, const void *buf, size_t size)
     if (vec->len == vec->maxlen)
         vector_resize(vec);
 
-    vec->ptr[vec->len] = calloc(1, size);
-    memcpy((vec->ptr)[vec->len], buf, size);
+    if (size == 0) {
+        vec->ptr[vec->len] = strdup(buf);
+    }
+    else {
+        vec->ptr[vec->len] = calloc(1, size);
+        memcpy((vec->ptr)[vec->len], buf, size);
+    }
+
     ++(vec->len);
 
     return 0;
