@@ -59,7 +59,7 @@ static void linklist_delete(struct list_head *head)
 }
 
 
-static int hash(const char *key) {
+static unsigned int hash(const char *key) {
     unsigned int hash = 0;
     int len = strlen(key);
     unsigned int *buff = (unsigned int *)key;
