@@ -325,7 +325,12 @@ static int text_box(const char *title, const char *prompt)
 
 static int input_box(const char *title, char *buf)
 {
-    dialog_inputbox(title, inputbox_instructions_string, 10, 75, NULL);
+	int res = 0;
+
+    res = dialog_inputbox(title, inputbox_instructions_string, 10, 75, buf);
+
+	if (res == KEY_ESC || res == -ERRDISPLAYTOOSMALL)
+		return -1;
 
     strcpy(buf, dialog_input_result);
 	return 0;
@@ -436,24 +441,35 @@ int conf_menu()
 				cluster_set_mode(sym.conf, vector_get(gamemode_list, res));
 				break;
 			case 3:
-				input_box("Max player", tmp);
-				if (is_string_number(tmp))
+				snprintf(tmp, sizeof(tmp), "%d", cluster_get_max_players(sym.conf));
+				res = input_box("Max player", tmp);
+				if (res == 0 && is_string_number(tmp))
 					cluster_set_max_player(sym.conf, tmp);
 				break;
 			case 6:
-				input_box("Server name", tmp);
-				cluster_set_server_name(sym.conf, tmp);
+				snprintf(tmp, sizeof(tmp), "%s", cluster_get_server_name(sym.conf));
+				res = input_box("Server name", tmp);
+				if (res == 0)
+					cluster_set_server_name(sym.conf, tmp);
 				break;
 			case 7:
-				input_box("Server description", tmp);
-				cluster_set_server_description(sym.conf, tmp);
+				snprintf(tmp, sizeof(tmp), "%s", cluster_get_server_description(sym.conf));
+				res = input_box("Server description", tmp);
+				if (res == 0)
+					cluster_set_server_description(sym.conf, tmp);
 				break;
 			case 8:
-				input_box("Server password", tmp);
-				cluster_set_server_password(sym.conf, tmp);
+				snprintf(tmp, sizeof(tmp), "%s", cluster_get_server_password(sym.conf));
+				res = input_box("Server password", tmp);
+				if (res == 0)
+					cluster_set_server_password(sym.conf, tmp);
 				break;				
 			case 10:
-				input_box("Cluster Name", tmp);
+				memset(tmp, 0, sizeof(tmp));
+				res = input_box("Cluster Name", tmp);
+				if (res < 0)
+					break;
+				
 				cluster_create(tmp);
 				vector_delete(vec);
 				vec = new_vector(NULL);
