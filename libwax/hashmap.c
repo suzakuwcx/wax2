@@ -179,3 +179,52 @@ void *hashmap_get(struct hashmap *map, char *key)
 
     return NULL;
 }
+
+
+int hashmap_size(struct hashmap *map)
+{
+    struct list_head *head;
+    int count = 0;
+
+    for (int i = 0; i < map->max_size; ++i) {
+        head = (map->slot)[i];
+        while (head != NULL) {
+            ++count;
+            head = head->next;
+        }
+    }
+
+    return count;
+}
+
+
+char **hashmap_keys(struct hashmap *map)
+{
+    struct list_head *head;
+    struct linklist *list;
+
+    int len = hashmap_size(map);
+    char **keys = calloc(len + 1, sizeof(char *));
+    int j = 0;
+
+    for (int i = 0; i < map->max_size; ++i) {
+        head = map->slot[i];
+        while (head != NULL) {
+            list = list_entry(head, struct linklist, head);
+            keys[j] = strdup(list->key);
+            ++j;
+            head = head->next;
+        }
+    }
+
+    return keys;
+}
+
+
+void hashmap_keys_delete(char **keys)
+{
+    for (int i = 0; keys[i] != NULL; ++i)
+        free(keys[i]);
+
+    free(keys);
+}
