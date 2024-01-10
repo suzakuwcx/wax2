@@ -339,6 +339,8 @@ int conf_menu()
     int selected = 0;
 
 	char tmp[PATH_MAX];
+
+	char *data;
 	struct vector *vec;
 	struct vector *gamemode_list;
 
@@ -366,23 +368,43 @@ int conf_menu()
         item_reset();
 
         item_make("(%s) Token", sym.token);
+		item_set_data("token");
+
 		item_make("Cluster (%s)  -->", sym.cluster);
+		item_set_data("cluser");
+
 		item_make("  Gamemode: (%s)  --->", cluster_get_gamemode(sym.conf));
+		item_set_data("gamemode");
+
 		item_make("  Max players (%d)", cluster_get_max_players(sym.conf));
+		item_set_data("players");
+
 		item_make("  [%c] Enable pvp", cluster_get_enable_pvp(sym.conf) ? '*' : ' ');
+		item_set_data("pvp");
+
 		item_make("  [%c] Enable rollback vote", cluster_get_enable_rollback_vote(sym.conf) ? '*' : ' ');
+		item_set_data("vote");
+
 		item_make("  (%s) Server name", cluster_get_server_name(sym.conf));
+		item_set_data("server_name");
+
 		item_make("  (%s) Server description", cluster_get_server_description(sym.conf));
+		item_set_data("server_description");
+
 		item_make("  (%s) Server password", cluster_get_server_password(sym.conf));
+		item_set_data("server_password");
+
 		item_make("---");
+		item_set_data("delimiter");
+		
 		item_make("Create New Cluster");
-		item_set_selected(selected);
+		item_set_data("new_cluster");
+
         dialog_clear();
 
         res = dialog_menu("Configuration",
                     menu_instructions,
-                    NULL, &s_scroll);
-
+                    data, &s_scroll);
 
 		/* 
 		 * Enter, Select "Exit"
@@ -393,6 +415,7 @@ int conf_menu()
 			break;
 
         selected = item_n();
+		data = item_data();
 
 		switch (res) {
 		case 0: /* Enter, Select "Select" */
