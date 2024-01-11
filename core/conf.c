@@ -181,10 +181,10 @@ static int parseargs_op(int opt)
 {
     switch (opt) {
         case 'S':
-            conf->op = CONFIG_OP_SERVER;
+            conf->op = (conf->op != CONFIG_OP_NONE ? CONFIG_OP_DUPLICATE : CONFIG_OP_SERVER);
             break;
         case 'M':
-            conf->op = CONFIG_OP_MOD;
+            conf->op = (conf->op != CONFIG_OP_NONE ? CONFIG_OP_DUPLICATE : CONFIG_OP_MOD);
             break;
         case 'h':
             conf->help = true;
@@ -295,6 +295,11 @@ int parseargs(int argc, char *argv[])
         }
 
         return 0;
+    }
+
+    if (conf->op == CONFIG_OP_DUPLICATE) {
+        fprintf(stderr, "error: only one operation may be used at a time\n");
+        return -EPERM;
     }
 
     if (conf->op == 0) {

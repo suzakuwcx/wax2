@@ -8,6 +8,7 @@ enum wax_op {
     CONFIG_OP_NONE = 0,
     CONFIG_OP_SERVER,
     CONFIG_OP_MOD,
+    CONFIG_OP_DUPLICATE,
 };
 
 enum wax_subop {
