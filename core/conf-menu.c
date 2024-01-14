@@ -106,8 +106,13 @@ int conf_menu()
 	strncpy(sym.cluster, config_get_cluster_name(), sizeof(sym.cluster));
     strncpy(sym.token, config_get_token(), sizeof(sym.token));
 
-	sym.conf = new_cluster_conf(sym.cluster);
 	gamemode_list = cluster_get_gamemode_chosen_list();
+	cluster_create(sym.cluster);
+	sym.conf = new_cluster_conf(sym.cluster);
+	if (sym.conf == NULL) {
+		fprintf(stderr, "cannot create cluster %s\n", sym.cluster);
+		return -1;
+	}
 
 	vec = new_vector(NULL);
 	cluster_list(vec);
