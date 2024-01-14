@@ -89,6 +89,30 @@ int systemf(const char *restrict format, ...)
     return system(command);
 }
 
+
+char *fread_a(const char *path) {
+    long len;
+    FILE *fp;
+    char *buff;
+
+    fp = fopen(path, "r");
+    if (fp == NULL)
+        return NULL;
+
+    /* get the size of the file */
+    fseek(fp, 0, SEEK_END);
+    len = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+
+    buff = calloc(1, len + 1);
+
+    fread(buff, 1, len + 1, fp);
+    fclose(fp);
+    
+    return buff;
+}
+
+
 void clear_screen()
 {
     printf("\33[H\33[2J\r");

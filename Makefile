@@ -19,7 +19,7 @@ YACC        = bison
 
 WAXINCLUDE = include/
 
-LDFLAGS := -lcurl -lncurses
+LDFLAGS := -lcurl -lncurses -llua
 CFLAGS := -I$(WAXINCLUDE) -g
 
 PHONY += all

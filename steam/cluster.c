@@ -12,6 +12,7 @@
 #include <wax/vector.h>
 #include <wax/conf-file.h>
 
+#include <steam/world.h>
 #include <steam/cluster.h>
 
 extern int errno;
@@ -128,8 +129,6 @@ int cluster_create(const char *name)
     char path[PATH_MAX];
     char tmp[PATH_MAX];
 
-    struct cluster_conf *conf;
-
     memset(path, 0, sizeof(path));
     memset(tmp, 0, sizeof(path));
     snprintf(path, sizeof(path), "%s/%s", config_get_dst_cluster_dir(), name);
@@ -154,9 +153,19 @@ int cluster_create(const char *name)
     fclose(fp);
 
     /* create a default cluster.ini */
-    conf = new_cluster_conf(name);
-    cluster_conf_save(conf);
-    cluster_conf_delete(conf);
+    struct cluster_conf *c_conf = new_cluster_conf(name);
+    cluster_conf_save(c_conf);
+    cluster_conf_delete(c_conf);
+
+    snprintf(tmp, sizeof(tmp), "%s/Master/leveldataoverride.lua", path);
+    struct world_conf *w_conf = new_world_conf(tmp, true);
+    world_conf_save(w_conf);
+    world_conf_delete(w_conf);
+
+    snprintf(tmp, sizeof(tmp), "%s/Caves/leveldataoverride.lua", path);
+    w_conf = new_world_conf(tmp, false);
+    world_conf_save(w_conf);
+    world_conf_delete(w_conf);
 
     return 0;
 }

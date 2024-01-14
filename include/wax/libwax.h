@@ -130,6 +130,23 @@ void dfa_reset(struct dfa *d);
 void dfa_delete(struct dfa *d);
 
 
+/**
+ * @brief Read the entire file content into buff
+ * 
+ * @param path The file path to be read
+ * @return char* The char buffer store all the content of the file,
+ *               need to be 'free()'
+ * @return NULL Error occur, most of the time is file not exist
+ * @code
+ * char *buff = fread_a("/tmp/hellworld.txt");
+ * printf("%s", buff);
+ * free(buff);
+ * @endcode
+ * 
+ */
+char *fread_a(const char *path);
+
+
 void clear_screen();
 void clear_line();
 
