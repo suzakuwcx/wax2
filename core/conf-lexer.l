@@ -8,7 +8,7 @@
 %option yylineno
 
 %%
-[[:alnum:]\.\"_-]+  { yylval.string = strdup(yytext); return T_TEXT; }
+[[:alnum:]\.\"_-]+  { conflval.string = strdup(yytext); return T_TEXT; }
 = return '=';
 \n return T_NEWLINE;
 <<EOF>> return T_EOF;
@@ -19,8 +19,9 @@
 \[.*\][<<EOF>>\n]  /* ignore title */;
 %%
 
-void parser_restart()
+void confreparse()
 {
     YY_FLUSH_BUFFER;
-    yyparse();
+    conflineno = 0;
+    confparse();
 }

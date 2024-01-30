@@ -517,7 +517,7 @@ void config_load()
     if (fp == NULL)
         return;
 
-    yyin = fp;
-    yyparse();
+    confin = fp;
+    confreparse();
     fclose(fp);
 }

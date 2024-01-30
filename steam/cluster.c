@@ -10,14 +10,12 @@
 #include <wax/conf.h>
 #include <wax/libwax.h>
 #include <wax/vector.h>
-#include <wax/conf-file.h>
 
 #include <steam/world.h>
 #include <steam/cluster.h>
 
 extern int errno;
 
-static struct cluster_conf *conf;
 static struct vector *gamemode_chosen_list;
 
 struct cluster_conf {
@@ -174,7 +172,7 @@ int cluster_create(const char *name)
 struct cluster_conf *new_cluster_conf(const char *name)
 {
     FILE *fp;
-    struct cluster_conf *_conf;
+    struct cluster_conf *conf;
 
     char path[PATH_MAX];
 
@@ -190,20 +188,17 @@ struct cluster_conf *new_cluster_conf(const char *name)
         return NULL;
     }
 
-    _conf = calloc(1, sizeof(struct cluster_conf));
-    _conf->path = strdup(path);
-    _conf->server_name = strdup("wax");
-    _conf->server_description = strdup("wax server");
-    _conf->server_password = strdup("123456");
-
-    set_parsing_cluster_ini_mode();
+    conf = calloc(1, sizeof(struct cluster_conf));
+    conf->path = strdup(path);
+    conf->server_name = strdup("wax");
+    conf->server_description = strdup("wax server");
+    conf->server_password = strdup("123456");
 
     /* send to lex and yacc */
-    yyin = fp;
-    conf = _conf;
+    clusterin = fp;
 
     /* start parsing */
-    parser_restart();
+    clusterreparse(conf);
     fclose(fp);
     
     return conf;
@@ -229,12 +224,6 @@ int cluster_conf_save(struct cluster_conf *conf)
     fclose(fp);
 
     return 0;
-}
-
-
-inline struct cluster_conf *cluster_get_current_conf()
-{
-    return conf;
 }
 
 

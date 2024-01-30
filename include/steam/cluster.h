@@ -1,6 +1,10 @@
 #include <stdbool.h>
+#include <stdio.h>
 
 #include <wax/vector.h>
+
+extern FILE *clusterin;
+extern int clusterlineno;
 
 struct cluster_conf;
 
@@ -9,6 +13,11 @@ enum game_mode {
     GAMEMODE_ENDLESS,
     GAMEMODE_WILDERNESS,
 };
+
+
+int clusterwrap();
+int clusterlex();
+void clusterreparse(struct cluster_conf *conf);
 
 
 /**
@@ -60,16 +69,6 @@ int cluster_create(const char *name);
  * @return 0 If success
  */
 int cluster_conf_save(struct cluster_conf *conf);
-
-
-/**
- * @brief This is the function for lex/yacc, to get current cluster_conf 
- 8          instance to modify
- * 
- * @return struct cluster_conf* Current cluster_conf instance, a global static
- *           variable in 'cluster.c'
- */
-struct cluster_conf *cluster_get_current_conf();
 
 
 /**
